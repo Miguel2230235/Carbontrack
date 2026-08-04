@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarbonTrack — Tu huella, tu ruta</title>
+<meta name="theme-color" content="#16241c">
+<meta name="description" content="Calculadora de huella de carbono personal — proyecto de hackathon sobre cambio climático.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button id="langToggle" class="lang-toggle" onclick="toggleLang()">EN</button>
+<div class="wrap">
+
+  <!-- HERO -->
+  <section id="hero">
+    <svg class="rings-illustration" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="200" cy="120" r="40" fill="none" stroke="#8fbc94" stroke-width="1.5"/>
+      <circle cx="200" cy="120" r="62" fill="none" stroke="#8fbc94" stroke-width="1.2" opacity=".85"/>
+      <circle cx="200" cy="120" r="86" fill="none" stroke="#e8a94d" stroke-width="1.2" opacity=".7"/>
+      <circle cx="200" cy="120" r="112" fill="none" stroke="#8fbc94" stroke-width="1" opacity=".55"/>
+      <circle cx="200" cy="120" r="140" fill="none" stroke="#6fa8dc" stroke-width="1" opacity=".4"/>
+      <circle cx="200" cy="120" r="6" fill="#e8a94d" opacity=".9"/>
+    </svg>
+    <p class="eyebrow" data-i18n="eyebrow">Proyecto de hackathon · Cambio climático</p>
+    <h1 data-i18n-html="hero_title">Cuánto pesa<br><em>tu</em> huella.</h1>
+    <p class="sub" data-i18n="hero_sub">Seis preguntas rápidas sobre tu transporte, comida, energía, agua, vuelos y consumo. A cambio: un número real y los cambios que más reducirían tu impacto este año.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('quiz')" data-i18n="btn_calculate">Calcular mi huella</button>
+      <button class="btn btn-ghost" onclick="openSimulator()" data-i18n="btn_simulator">Simulador en vivo</button>
+      <button class="btn btn-ghost" onclick="toggleHistory()" data-i18n="btn_history">Ver historial guardado</button>
+    </div>
+    <div id="historyBox" class="card hidden" style="margin-top:20px;">
+      <p class="chapter" data-i18n="your_progress">Tu progreso</p>
+      <p class="chapter-title" style="font-size:20px;" data-i18n="saved_calcs">Cálculos guardados</p>
+      <div id="goalProgressBox"></div>
+      <div id="historyChart" class="history-chart"></div>
+      <div id="historyList"></div>
+      <p class="section-label" data-i18n="achievements">Logros</p>
+      <div id="badgesGrid" class="badges-grid"></div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="hidden">
+    <div class="steps-track" id="stepsTrack">
+      <div class="step-seg"><span><i id="track1"></i></span><label><span>🚗</span> <span data-i18n="title_transport">Transporte</span></label></div>
+      <div class="step-seg"><span><i id="track2"></i></span><label><span>🍽</span> <span data-i18n="step_food">Comida</span></label></div>
+      <div class="step-seg"><span><i id="track3"></i></span><label><span>⚡</span> <span data-i18n="sim_label_energy">Energía</span></label></div>
+      <div class="step-seg"><span><i id="track4"></i></span><label><span>💧</span> <span data-i18n="title_water">Agua</span></label></div>
+      <div class="step-seg"><span><i id="track5"></i></span><label><span>✈️</span> <span data-i18n="title_flights">Vuelos</span></label></div>
+      <div class="step-seg"><span><i id="track6"></i></span><label><span>🛍</span> <span data-i18n="sim_label_shopping">Compras</span></label></div>
+    </div>
+
+    <div class="card" id="step1">
+      <p class="chapter step-chapter" data-step="1">1 / 6</p>
+      <h2 class="chapter-title" data-i18n="title_transport">Transporte</h2>
+      <p class="hint" data-i18n="hint_transport">ⓘ La quema de combustible en carros y motos es una de las fuentes más grandes de CO₂ del día a día.</p>
+      <fieldset>
+        <legend data-i18n="legend_transport">¿Cómo te mueves casi todos los días?</legend>
+        <div class="options" data-group="transport">
+          <label class="opt"><input type="radio" name="transport" value="car"><span class="opt-label" data-i18n="opt_car">Carro particular (gasolina)</span><span class="opt-hint">0.21 kg/km</span></label>
+          <label class="opt"><input type="radio" name="transport" value="moto"><span class="opt-label" data-i18n="opt_moto">Motocicleta</span><span class="opt-hint">0.11 kg/km</span></label>
+          <label class="opt"><input type="radio" name="transport" value="public"><span class="opt-label" data-i18n="opt_public">Transporte público</span><span class="opt-hint">0.05 kg/km</span></label>
+          <label class="opt"><input type="radio" name="transport" value="bike"><span class="opt-label" data-i18n="opt_bike">Bici / caminar</span><span class="opt-hint">0 kg/km</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><span data-i18n="legend_km">¿Cuántos km recorres por semana con ese medio?</span> <span id="kmVal" class="num-badge">50 km</span></legend>
+        <div class="num-row">
+          <input type="range" id="kmRange" min="0" max="400" value="50" oninput="updateKm(this.value)">
+        </div>
+      </fieldset>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="nextStep(1)" data-i18n="btn_next">Siguiente</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="step2">
+      <p class="chapter step-chapter" data-step="2">2 / 6</p>
+      <h2 class="chapter-title" data-i18n="title_diet">Alimentación</h2>
+      <p class="hint" data-i18n="hint_diet">ⓘ La ganadería genera metano, un gas de efecto invernadero muy potente. Comer menos carne roja es de las acciones individuales de mayor impacto.</p>
+      <fieldset>
+        <legend data-i18n="legend_diet">¿Cómo describirías tu dieta habitual?</legend>
+        <div class="options" data-group="diet">
+          <label class="opt"><input type="radio" name="diet" value="alto"><span class="opt-label" data-i18n="opt_diet_alto">Carne casi a diario</span><span class="opt-hint" data-i18n="hint_high">alto impacto</span></label>
+          <label class="opt"><input type="radio" name="diet" value="moderado"><span class="opt-label" data-i18n="opt_diet_moderado">Carne algunas veces por semana</span><span class="opt-hint" data-i18n="hint_medium">medio</span></label>
+          <label class="opt"><input type="radio" name="diet" value="bajo"><span class="opt-label" data-i18n="opt_diet_bajo">Vegetariana</span><span class="opt-hint" data-i18n="hint_low">bajo</span></label>
+          <label class="opt"><input type="radio" name="diet" value="vegano"><span class="opt-label" data-i18n="opt_diet_vegano">Vegana</span><span class="opt-hint" data-i18n="hint_verylow">muy bajo</span></label>
+        </div>
+      </fieldset>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="prevStep(2)" data-i18n="btn_back">Atrás</button>
+        <button class="btn btn-primary" onclick="nextStep(2)" data-i18n="btn_next">Siguiente</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="step3">
+      <p class="chapter step-chapter" data-step="3">3 / 6</p>
+      <h2 class="chapter-title" data-i18n="title_energy">Energía en casa</h2>
+      <p class="hint" data-i18n="hint_energy">ⓘ Gran parte de la electricidad mundial todavía se genera quemando carbón o gas.</p>
+      <fieldset>
+        <legend data-i18n="legend_energy">¿Cómo es el consumo eléctrico de tu hogar?</legend>
+        <div class="options" data-group="energy">
+          <label class="opt"><input type="radio" name="energy" value="grande"><span class="opt-label" data-i18n="opt_energy_alto">Alto — A/C casi siempre, casa grande</span><span class="opt-hint" data-i18n="hint_high">alto</span></label>
+          <label class="opt"><input type="radio" name="energy" value="media"><span class="opt-label" data-i18n="opt_energy_medio">Medio — uso normal, algo de A/C</span><span class="opt-hint" data-i18n="hint_medium">medio</span></label>
+          <label class="opt"><input type="radio" name="energy" value="pequena"><span class="opt-label" data-i18n="opt_energy_bajo">Bajo — consumo eficiente</span><span class="opt-hint" data-i18n="hint_low">bajo</span></label>
+        </div>
+      </fieldset>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="prevStep(3)" data-i18n="btn_back">Atrás</button>
+        <button class="btn btn-primary" onclick="nextStep(3)" data-i18n="btn_next">Siguiente</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="step4">
+      <p class="chapter step-chapter" data-step="4">4 / 6</p>
+      <h2 class="chapter-title" data-i18n="title_water">Agua</h2>
+      <p class="hint" data-i18n="hint_water">ⓘ Calentar y tratar el agua que usas también consume energía, casi siempre de la red eléctrica.</p>
+      <fieldset>
+        <legend data-i18n="legend_water">¿Cómo describirías tu consumo de agua en casa (duchas largas, lavado frecuente, etc.)?</legend>
+        <div class="options" data-group="water">
+          <label class="opt"><input type="radio" name="water" value="alto"><span class="opt-label" data-i18n="opt_water_alto">Alto — duchas largas, lavados frecuentes</span><span class="opt-hint" data-i18n="hint_high">alto</span></label>
+          <label class="opt"><input type="radio" name="water" value="medio"><span class="opt-label" data-i18n="opt_water_medio">Medio — uso normal</span><span class="opt-hint" data-i18n="hint_medium">medio</span></label>
+          <label class="opt"><input type="radio" name="water" value="bajo"><span class="opt-label" data-i18n="opt_water_bajo">Bajo — consciente del consumo</span><span class="opt-hint" data-i18n="hint_low">bajo</span></label>
+        </div>
+      </fieldset>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="prevStep(4)" data-i18n="btn_back">Atrás</button>
+        <button class="btn btn-primary" onclick="nextStep(4)" data-i18n="btn_next">Siguiente</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="step5">
+      <p class="chapter step-chapter" data-step="5">5 / 6</p>
+      <h2 class="chapter-title" data-i18n="title_flights">Vuelos</h2>
+      <p class="hint" data-i18n="hint_flights">ⓘ Un solo vuelo largo puede generar más CO₂ que meses de transporte terrestre habitual.</p>
+      <fieldset>
+        <legend data-i18n="legend_flights">¿Cuántos vuelos tomas aproximadamente al año?</legend>
+        <div class="options" data-group="flights">
+          <label class="opt"><input type="radio" name="flights" value="ninguno"><span class="opt-label" data-i18n="opt_flights_ninguno">Ninguno</span><span class="opt-hint">0 kg</span></label>
+          <label class="opt"><input type="radio" name="flights" value="pocos"><span class="opt-label" data-i18n="opt_flights_pocos">1–2 vuelos cortos</span><span class="opt-hint" data-i18n="hint_low">bajo</span></label>
+          <label class="opt"><input type="radio" name="flights" value="moderado"><span class="opt-label" data-i18n="opt_flights_moderado">Un par de vuelos, alguno largo</span><span class="opt-hint" data-i18n="hint_medium">medio</span></label>
+          <label class="opt"><input type="radio" name="flights" value="frecuente"><span class="opt-label" data-i18n="opt_flights_frecuente">Viajo frecuentemente / vuelos largos</span><span class="opt-hint" data-i18n="hint_high">alto</span></label>
+        </div>
+      </fieldset>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="prevStep(5)" data-i18n="btn_back">Atrás</button>
+        <button class="btn btn-primary" onclick="nextStep(5)" data-i18n="btn_next">Siguiente</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="step6">
+      <p class="chapter step-chapter" data-step="6">6 / 6</p>
+      <h2 class="chapter-title" data-i18n="title_shopping">Compras y consumo</h2>
+      <p class="hint" data-i18n="hint_shopping">ⓘ Fabricar ropa y aparatos electrónicos nuevos consume recursos y energía mucho antes de que lleguen a tus manos.</p>
+      <fieldset>
+        <legend data-i18n="legend_shopping">¿Con qué frecuencia compras ropa o electrónicos nuevos?</legend>
+        <div class="options" data-group="shopping">
+          <label class="opt"><input type="radio" name="shopping" value="alto"><span class="opt-label" data-i18n="opt_shopping_alto">Frecuente — compro seguido cosas nuevas</span><span class="opt-hint" data-i18n="hint_high">alto</span></label>
+          <label class="opt"><input type="radio" name="shopping" value="medio"><span class="opt-label" data-i18n="opt_shopping_medio">Moderado — compro cuando lo necesito</span><span class="opt-hint" data-i18n="hint_medium">medio</span></label>
+          <label class="opt"><input type="radio" name="shopping" value="bajo"><span class="opt-label" data-i18n="opt_shopping_bajo">Bajo — reutilizo, compro poco</span><span class="opt-hint" data-i18n="hint_low">bajo</span></label>
+        </div>
+      </fieldset>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="prevStep(6)" data-i18n="btn_back">Atrás</button>
+        <button class="btn btn-primary" onclick="calculate()" data-i18n="btn_view_result">Ver mi resultado</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="hidden">
+    <p class="section-label" data-i18n="section_your_result">Tu resultado</p>
+    <div class="card">
+      <div class="result-top">
+        <div class="gauge-wrap">
+          <svg width="172" height="172" viewBox="0 0 172 172">
+            <circle cx="86" cy="86" r="72" fill="none" stroke="#28402f" stroke-width="14"/>
+            <circle id="gaugeArc" cx="86" cy="86" r="72" fill="none" stroke="#8fbc94" stroke-width="14"
+              stroke-linecap="round" stroke-dasharray="452" stroke-dashoffset="452"
+              transform="rotate(-90 86 86)"/>
+            <text x="86" y="80" text-anchor="middle" font-family="Fraunces" font-size="22" fill="#f3efe3">🌳</text>
+          </svg>
+          <div class="gauge-num">
+            <b id="totalKg">0</b>
+            <span data-i18n="unit_kg_year">kg CO₂e / año</span>
+          </div>
+        </div>
+        <p class="compare-text" id="compareText"></p>
+      </div>
+
+      <p class="section-label" style="margin-top:0;" data-i18n="section_top3">Tus 3 cambios de mayor impacto</p>
+      <div class="rec-list" id="recList"></div>
+      <p class="combo-text" id="comboText"></p>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveResult()" data-i18n="btn_save_result">Guardar este resultado</button>
+        <button class="btn btn-ghost" onclick="restart()" data-i18n="btn_recalculate">Volver a calcular</button>
+      </div>
+    </div>
+
+    <div class="card" id="goalCard">
+      <p class="chapter" data-i18n="chapter_goal">Meta</p>
+      <h2 class="chapter-title" style="font-size:22px;" data-i18n="title_goal">Ponte un objetivo de reducción</h2>
+      <p class="sub" style="margin-bottom:18px; font-size:14px;" data-i18n="desc_goal">Elige cuánto quieres reducir tu huella respecto a tu resultado actual. Cada vez que guardes un nuevo resultado, verás tu progreso hacia esta meta.</p>
+      <fieldset>
+        <legend data-i18n="legend_goal">Quiero reducir mi huella en:</legend>
+        <div class="options" data-group="goalPercent">
+          <label class="opt"><input type="radio" name="goalPercent" value="10"><span class="opt-label" data-i18n="goal_10">10% — un primer paso</span></label>
+          <label class="opt"><input type="radio" name="goalPercent" value="20"><span class="opt-label" data-i18n="goal_20">20% — meta moderada</span></label>
+          <label class="opt"><input type="radio" name="goalPercent" value="35"><span class="opt-label" data-i18n="goal_35">35% — meta ambiciosa</span></label>
+        </div>
+      </fieldset>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveGoal()" data-i18n="btn_save_goal">Guardar meta</button>
+      </div>
+      <div id="goalStatus"></div>
+    </div>
+  </section>
+
+  <!-- SIMULATOR -->
+  <section id="simulator" class="hidden">
+    <p class="section-label" data-i18n="btn_simulator">Simulador en vivo</p>
+    <div class="card">
+      <p class="sub" style="margin-bottom:24px; font-size:14px;" data-i18n="desc_simulator">Mueve los controles y mira cómo cambiaría tu huella al instante, sin rehacer el cuestionario.</p>
+
+      <div class="sim-grid">
+        <div class="sim-row">
+          <label data-i18n="title_transport">Transporte</label>
+          <select id="simTransport" onchange="updateSimulator()">
+            <option value="car" data-i18n="opt_sim_car">Carro</option>
+            <option value="moto" data-i18n="opt_moto">Moto</option>
+            <option value="public" data-i18n="opt_public">Transporte público</option>
+            <option value="bike" data-i18n="opt_bike">Bici / caminar</option>
+          </select>
+          <input type="range" id="simKm" min="0" max="400" value="50" oninput="updateSimulator()">
+          <span class="num-badge" id="simKmVal">50 km/sem</span>
+        </div>
+        <div class="sim-row">
+          <label data-i18n="sim_label_diet">Dieta</label>
+          <select id="simDiet" onchange="updateSimulator()">
+            <option value="alto" data-i18n="opt_sim_diet_alto">Carne diaria</option>
+            <option value="moderado" data-i18n="opt_sim_diet_moderado">Carne moderada</option>
+            <option value="bajo" data-i18n="opt_diet_bajo">Vegetariana</option>
+            <option value="vegano" data-i18n="opt_diet_vegano">Vegana</option>
+          </select>
+        </div>
+        <div class="sim-row">
+          <label data-i18n="sim_label_energy">Energía</label>
+          <select id="simEnergy" onchange="updateSimulator()">
+            <option value="grande" data-i18n="opt_alto">Alto</option>
+            <option value="media" data-i18n="opt_medio">Medio</option>
+            <option value="pequena" data-i18n="opt_bajo">Bajo</option>
+          </select>
+        </div>
+        <div class="sim-row">
+          <label data-i18n="title_water">Agua</label>
+          <select id="simWater" onchange="updateSimulator()">
+            <option value="alto" data-i18n="opt_alto">Alto</option>
+            <option value="medio" data-i18n="opt_medio">Medio</option>
+            <option value="bajo" data-i18n="opt_bajo">Bajo</option>
+          </select>
+        </div>
+        <div class="sim-row">
+          <label data-i18n="title_flights">Vuelos</label>
+          <select id="simFlights" onchange="updateSimulator()">
+            <option value="frecuente" data-i18n="opt_frecuente">Frecuente</option>
+            <option value="moderado" data-i18n="opt_moderado">Moderado</option>
+            <option value="pocos" data-i18n="opt_sim_pocos">1-2 cortos</option>
+            <option value="ninguno" data-i18n="opt_flights_ninguno">Ninguno</option>
+          </select>
+        </div>
+        <div class="sim-row">
+          <label data-i18n="sim_label_shopping">Compras</label>
+          <select id="simShopping" onchange="updateSimulator()">
+            <option value="alto" data-i18n="opt_alto">Alto</option>
+            <option value="medio" data-i18n="opt_medio">Medio</option>
+            <option value="bajo" data-i18n="opt_bajo">Bajo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sim-result">
+        <span class="sim-total" id="simTotal">0</span>
+        <span class="sim-unit" data-i18n="unit_kg_year">kg CO₂e / año</span>
+        <p class="sim-delta" id="simDelta"></p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="showSection('hero')" data-i18n="btn_back_home">Volver al inicio</button>
+      </div>
+    </div>
+  </section>
+
+  <footer data-i18n="footer_text">
+    CarbonTrack · estimaciones simplificadas con fines educativos para hackathon, basadas en factores de emisión promedio de transporte, dieta, energía, agua, vuelos y consumo. No sustituye un inventario de carbono certificado.
+  </footer>
+</div>
+
+<script src="js/i18n.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>
